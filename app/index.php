@@ -12,10 +12,10 @@ use Slim\Routing\RouteContext;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-require_once './db/AccesoDatos.php';
 // require_once './middlewares/Logger.php';
 
-require_once './controllers/UsuarioController.php';
+require_once './controllers/UserController.php';
+require_once './interfaces/IApiUse.php';
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -23,6 +23,7 @@ $dotenv->safeLoad();
 
 // Instantiate App
 $app = AppFactory::create();
+$app->setBasePath('/app');
 
 // Add error middleware
 $app->addErrorMiddleware(true, true, true);
@@ -30,12 +31,12 @@ $app->addErrorMiddleware(true, true, true);
 // Add parse body
 $app->addBodyParsingMiddleware();
 
-// Routes
-$app->group('/usuarios', function (RouteCollectorProxy $group) {
-    $group->get('[/]', \UsuarioController::class . ':TraerTodos');
-    $group->get('/{usuario}', \UsuarioController::class . ':TraerUno');
-    $group->post('[/]', \UsuarioController::class . ':CargarUno');
-  });
+
+$app->group('/users', function (RouteCollectorProxy $group) {
+    $group->get('[/]', UserController::class . ':GetAll');
+    $group->get('/{id}', UserController::class . ':Get');
+    $group->post('[/]', UserController::class . ':Add');
+});
 
 $app->get('[/]', function (Request $request, Response $response) {    
     $payload = json_encode(array("mensaje" => "Slim Framework 4 PHP"));
