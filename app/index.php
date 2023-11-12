@@ -16,6 +16,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 require_once './controllers/UserController.php';
 require_once './controllers/ProductController.php';
+require_once './controllers/TableController.php';
 require_once './interfaces/IApiUse.php';
 
 // Load ENV
@@ -59,6 +60,18 @@ $app->group('/products', function (RouteCollectorProxy $group) {
     $group->delete('/{id}', ProductController::class . ':Delete');
     //$group->post('/load', ProductController::class . '::Load');
     //$group->get('/download', ProductController::class . '::Download');
+});
+
+$app->group('/tables', function (RouteCollectorProxy $group) {
+    $group->get('[/]', TableController::class . ':GetAll');
+    $group->get('/{id}', TableController::class . ':Get');
+    $group->post('[/]', TableController::class . ':Add');
+    $group->put('/{id}', TableController::class . ':Update');
+    $group->delete('/{id}', TableController::class . ':Delete');
+    //$group->get('/cuenta/{codigoPedido}', TableController::class . '::CuentaMesa')->add(\Autentificador::class . '::ValidarMozo');
+    //$group->get('/cobrar/{codigoPedido}', TableController::class . '::CobrarMesa')->add(\Autentificador::class . '::ValidarMozo');
+    //$group->get('/cerrar/{id}', TableController::class . '::CerrarMesa')->add(\Autentificador::class . '::ValidarSocio');
+    //$group->get('/usos', TableController::class . '::UsosMesa')->add(\Autentificador::class . '::ValidarSocio');
 });
 
 $app->get('[/]', function (Request $request, Response $response) {    

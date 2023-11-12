@@ -1,5 +1,5 @@
 <?php
-
+require_once './enums/TableStatus.php';
 class Table implements IPersistance
 {
     public $id;
@@ -29,7 +29,7 @@ class Table implements IPersistance
         $DAO = DataAccessObject::getInstance();
         $request = $DAO->prepareRequest("INSERT INTO tables (id, status) VALUES (:id, :status)");
         $request->bindValue(':id', $code, PDO::PARAM_STR);
-        $request->bindValue(':status', TableStatus::CLOSE, PDO::PARAM_STR);
+        $request->bindValue(':status', TableStatus::CLOSE->getStringValue(), PDO::PARAM_STR);
         $request->execute();
         return $DAO->getLastId();
     }
@@ -37,7 +37,8 @@ class Table implements IPersistance
     public static function getAll()
     {
         $DAO = DataAccessObject::getInstance();
-        $request = $DAO->prepareRequest("SELECT id, status FROM tables WHERE status != TableStatus::BAJA");
+        $request = $DAO->prepareRequest("SELECT id, status FROM tables WHERE status != :status");
+        $request->bindValue(':status', TableStatus::DOWN->getStringValue(), PDO::PARAM_INT);
         $request->execute();
 
         return $request->fetchAll(PDO::FETCH_CLASS, 'Table');
@@ -46,8 +47,9 @@ class Table implements IPersistance
     public static function getOne($id)
     {
         $DAO = DataAccessObject::getInstance();
-        $request = $DAO->prepareRequest("SELECT id, status FROM tables WHERE id = :id");
+        $request = $DAO->prepareRequest("SELECT id, status FROM tables WHERE id = :id AND status != :status");
         $request->bindValue(':id', $id, PDO::PARAM_INT);
+        $request->bindValue(':status', TableStatus::DOWN->getStringValue(), PDO::PARAM_INT);
         $request->execute();
 
         return $request->fetchObject('Table');
@@ -58,7 +60,7 @@ class Table implements IPersistance
         $DAO = DataAccessObject::getInstance();
         $request = $DAO->prepareRequest("UPDATE tables SET status = :status WHERE id = :id");
         $request->bindValue(':id', $table->id, PDO::PARAM_INT);
-        $request->bindValue(':status', $table->estado, PDO::PARAM_STR);
+        $request->bindValue(':status', $table->status, PDO::PARAM_STR);
         $request->execute();
     }
 
@@ -67,18 +69,26 @@ class Table implements IPersistance
         $DAO = DataAccessObject::getInstance();
         $request = $DAO->prepareRequest("UPDATE tables SET status = :status WHERE id = :id");
         $request->bindValue(':id', $id, PDO::PARAM_INT);
-        $request->bindValue(':status', TableStatus::DOWN, PDO::PARAM_STR);
+        $request->bindValue(':status', TableStatus::DOWN->getStringValue(), PDO::PARAM_STR);
         $request->execute();
     }
 
     private static function generateCode($length)
     {
-        $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        $numbers = "0123456789";
+
         $code = "";
 
-        for ($i = 0; $i < $length; $i++) {
-            $code .= $chars[rand(0, strlen($chars) - 1)];
+        $code .= $letters[rand(0, strlen($letters) - 1)];
+        $code .= $numbers[rand(0, strlen($numbers) - 1)];
+
+        for ($i = 2; $i < $length; $i++) {
+            $characters = $letters . $numbers;
+            $code .= $characters[rand(0, strlen($characters) - 1)];
         }
+
+        $code = str_shuffle($code);
 
         return $code;
     }
