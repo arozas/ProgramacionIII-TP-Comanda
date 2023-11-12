@@ -30,6 +30,10 @@ class UserController implements IApiUse
 
         $userID = $args['id'];
         $user = User::getOne($userID);
+        if(!$user)
+        {
+            $user = array("error" => "Usuario no existe");
+        }
         $payload = json_encode($user);
         $response->getBody()->write($payload);
         return $response

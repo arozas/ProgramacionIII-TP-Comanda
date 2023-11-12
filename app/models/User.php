@@ -8,12 +8,12 @@ require_once './models/dto/UserDTO.php';
 
 class User implements IPersistance
 {
-    public $id;
-    public $user;
-    public $password;
-    public $userType;
-    public $active;
-    public $modifiedDate;
+    private $id;
+    private $user;
+    private $password;
+    private $userType;
+    private $active;
+    private $modifiedDate;
 
     public function __get($property)
     {
@@ -58,7 +58,7 @@ class User implements IPersistance
     public static function getAll()
     {
         $DAO = DataAccessObject::getInstance();
-        $request = $DAO->prepareRequest("SELECT id, user, password, userType FROM users");
+        $request = $DAO->prepareRequest("SELECT id, user, password, userType FROM users WHERE active = true");
         $request->execute();
 
         return $request->fetchAll(PDO::FETCH_CLASS, 'UserDTO');
@@ -71,7 +71,7 @@ class User implements IPersistance
         $request->bindValue(':id', $id, PDO::PARAM_STR);
         $request->execute();
 
-        return $request->fetchObject('User');
+        return $request->fetchObject('UserDTO');
     }
 
     public static function update($user)
@@ -91,7 +91,7 @@ class User implements IPersistance
     public static function delete($id)
     {
         $DAO = DataAccessObject::getInstance();
-        $request = $DAO->prepareRequest("UPDATE users SET modifiedDate = :modifiedDate WHERE id = :id AND active = false");
+        $request = $DAO->prepareRequest("UPDATE users SET modifiedDate = :modifiedDate, active = false WHERE id = :id");
         $date = new DateTime(date("d-m-Y"));
         $request->bindValue(':id', $id, PDO::PARAM_INT);
         $request->bindValue(':modifiedDate', date_format($date, 'Y-m-d H:i:s'));

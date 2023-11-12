@@ -15,6 +15,7 @@ require __DIR__ . '/../vendor/autoload.php';
 // require_once './middlewares/Logger.php';
 
 require_once './controllers/UserController.php';
+require_once './controllers/ProductController.php';
 require_once './interfaces/IApiUse.php';
 
 // Load ENV
@@ -26,7 +27,17 @@ $app = AppFactory::create();
 $app->setBasePath('/app');
 
 // Add error middleware
-$app->addErrorMiddleware(true, true, true);
+$errorMiddleware = function ($request, $exception, $displayErrorDetails) use ($app) {
+    $statusCode = 500;
+    $errorMessage = $exception->getMessage();
+    $response = $app->getResponseFactory()->createResponse($statusCode);
+    $response->getBody()->write(json_encode(['error' => $errorMessage]));
+
+    return $response->withHeader('Content-Type', 'application/json');
+};
+
+$app->addErrorMiddleware(true, true, true)
+    ->setDefaultErrorHandler($errorMiddleware);
 
 // Add parse body
 $app->addBodyParsingMiddleware();
@@ -36,10 +47,22 @@ $app->group('/users', function (RouteCollectorProxy $group) {
     $group->get('[/]', UserController::class . ':GetAll');
     $group->get('/{id}', UserController::class . ':Get');
     $group->post('[/]', UserController::class . ':Add');
+    $group->put('/{id}', UserController::class . '::Update');
+    $group->delete('/{id}', UserController::class . '::Delete');
+});
+
+$app->group('/products', function (RouteCollectorProxy $group) {
+    $group->get('[/]', ProductController::class . ':GetAll');
+    $group->get('/{id}', ProductController::class . ':Get');
+    $group->post('[/]', ProductController::class . ':Add');
+    $group->put('/{id}', ProductController::class . ':Update');
+    $group->delete('/{id}', ProductController::class . ':Delete');
+    //$group->post('/load', ProductController::class . '::Load');
+    //$group->get('/download', ProductController::class . '::Download');
 });
 
 $app->get('[/]', function (Request $request, Response $response) {    
-    $payload = json_encode(array("mensaje" => "Slim Framework 4 PHP"));
+    $payload = json_encode(array("mensaje" => "API Comandas funcionando."));
     
     $response->getBody()->write($payload);
     return $response->withHeader('Content-Type', 'application/json');
