@@ -98,11 +98,11 @@ class Product implements IPersistance
         $request->execute();
     }
 
-    public static function DescriptionValidation($description)
+    public static function NameValidation($name)
     {
         $productList = Product::getAll();
         foreach ($productList as $p) {
-            if ($p->description == $description) {
+            if ($p->name == $name) {
                 return $p;
             }
         }

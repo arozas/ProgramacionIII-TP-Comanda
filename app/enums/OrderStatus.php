@@ -7,4 +7,8 @@ enum OrderStatus: string
     case READY = 'Listo para servir';
     case DELIVERED = 'Entregado';
 
+    public function getStringValue(): string
+    {
+        return $this->value;
+    }
 }

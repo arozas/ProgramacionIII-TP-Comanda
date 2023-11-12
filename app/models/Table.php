@@ -73,7 +73,7 @@ class Table implements IPersistance
         $request->execute();
     }
 
-    private static function generateCode($length)
+    public static function generateCode($length)
     {
         $letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         $numbers = "0123456789";

@@ -14,10 +14,12 @@ require __DIR__ . '/../vendor/autoload.php';
 
 // require_once './middlewares/Logger.php';
 
+require_once './interfaces/IApiUse.php';
 require_once './controllers/UserController.php';
 require_once './controllers/ProductController.php';
 require_once './controllers/TableController.php';
-require_once './interfaces/IApiUse.php';
+require_once './controllers/OrderController.php';
+
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -72,6 +74,21 @@ $app->group('/tables', function (RouteCollectorProxy $group) {
     //$group->get('/cobrar/{codigoPedido}', TableController::class . '::CobrarMesa')->add(\Autentificador::class . '::ValidarMozo');
     //$group->get('/cerrar/{id}', TableController::class . '::CerrarMesa')->add(\Autentificador::class . '::ValidarSocio');
     //$group->get('/usos', TableController::class . '::UsosMesa')->add(\Autentificador::class . '::ValidarSocio');
+});
+
+$app->group('/orders', function (RouteCollectorProxy $group) {
+    $group->get('[/]', OrderController::class . '::GetAll');
+    $group->get('/{id}', OrderController::class . '::Get');
+    $group->post('[/]', OrderController::class . '::Add');
+    $group->put('[/{id}]', OrderController::class . '::Update');
+    $group->delete('[/{id}]', OrderController::class . '::Delete');
+    //$group->get('/listos', OrderController::class . '::TraerListos');
+    //$group->get('/pendientes', OrderController::class . '::TraerPendientes');
+    //$group->post('/inicio/{id}', OrderController::class . '::IniciarPedido');
+    //$group->post('/final/{id}', OrderController::class . '::FinalizarPedido');
+    //$group->post('/entregar/{id}', OrderController::class . '::EntregarPedido');
+    //$group->get('/{codigoMesa}-{codigoPedido}', OrderController::class . '::TraerPedidosMesa');
+
 });
 
 $app->get('[/]', function (Request $request, Response $response) {    
