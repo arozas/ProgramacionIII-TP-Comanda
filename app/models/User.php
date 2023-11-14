@@ -98,6 +98,16 @@ class User implements IPersistance
         $request->execute();
     }
 
+    public static function getUser($user)
+    {
+        $DAO = DataAccessObject::getInstance();
+        $request = $DAO->prepareRequest("SELECT id, user, password, userType FROM users WHERE user = :user AND active = true");
+        $request->bindValue(':user', $user, PDO::PARAM_STR);
+        $request->execute();
+        return $request->fetchObject('UserDTO');
+    }
+
+
     public static function UserTypeValidation($userType)
     {
         if (   $userType != UserType::PARTNER
