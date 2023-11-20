@@ -49,6 +49,16 @@ class UserService implements IPersistance
         return $request->fetchObject('UserDTO');
     }
 
+    public static function getOneByUsername($userName)
+    {
+        $DAO = DataAccessObject::getInstance();
+        $request = $DAO->prepareRequest("SELECT id, user, password, userType FROM users WHERE user = :userName AND active = true");
+        $request->bindValue(':userName', $userName, PDO::PARAM_STR);
+        $request->execute();
+
+        return $request->fetchObject('UserDTO');
+    }
+
     public static function update($user)
     {
         $DAO = DataAccessObject::getInstance();

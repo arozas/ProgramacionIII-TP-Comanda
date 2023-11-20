@@ -2,7 +2,7 @@
 
 require_once './services/UserService.php';
 
-class UserTypeValidator
+class Validator
 {
 
     public static function NewUserValidation($request, $handler)
@@ -10,7 +10,7 @@ class UserTypeValidator
         $parametros = $request->getParsedBody();
 
         $username = $parametros['usuario'];
-        $userType = $parametros['rol'];
+        $userType = $parametros['tipoUsuario'];
         if (UserService::UserTypeValidation($userType) && UserService::UserNameValidation($username) == null) {
             return $handler->handle($request);
         }

@@ -12,7 +12,9 @@ use Slim\Routing\RouteContext;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// require_once './middlewares/Logger.php';
+require_once './middlewares/Logger.php';
+require_once './middlewares/AuthMiddleware.php';
+require_once './middlewares/Validator.php';
 
 require_once './interfaces/IApiUse.php';
 require_once './controllers/UserController.php';
@@ -46,30 +48,31 @@ $app->addErrorMiddleware(true, true, true)
 $app->addBodyParsingMiddleware();
 
 
+//ABM.
 $app->group('/users', function (RouteCollectorProxy $group) {
-    $group->get('[/]', UserController::class . ':GetAll');
-    $group->get('/{id}', UserController::class . ':Get');
-    $group->post('[/]', UserController::class . ':Add');
-    $group->put('/{id}', UserController::class . '::Update');
-    $group->delete('/{id}', UserController::class . '::Delete');
+    $group->get('[/]', UserController::class . ':GetAll')->add(new AuthMiddleware('socio'));
+    $group->get('/{id}', UserController::class . ':Get')->add(new AuthMiddleware('socio'));
+    $group->post('[/]', UserController::class . ':Add')->add(new AuthMiddleware('socio'))->add(Validator::class . '::NewUserValidation');
+    $group->put('/{id}', UserController::class . '::Update')->add(new AuthMiddleware('socio'));
+    $group->delete('/{id}', UserController::class . '::Delete')->add(new AuthMiddleware('socio'));
 });
 
 $app->group('/products', function (RouteCollectorProxy $group) {
-    $group->get('[/]', ProductController::class . ':GetAll');
-    $group->get('/{id}', ProductController::class . ':Get');
-    $group->post('[/]', ProductController::class . ':Add');
-    $group->put('/{id}', ProductController::class . ':Update');
-    $group->delete('/{id}', ProductController::class . ':Delete');
+    $group->get('[/]', ProductController::class . ':GetAll')->add(new AuthMiddleware('socio'));
+    $group->get('/{id}', ProductController::class . ':Get')->add(new AuthMiddleware('socio'));
+    $group->post('[/]', ProductController::class . ':Add')->add(new AuthMiddleware('socio'));
+    $group->put('/{id}', ProductController::class . ':Update')->add(new AuthMiddleware('socio'));
+    $group->delete('/{id}', ProductController::class . ':Delete')->add(new AuthMiddleware('socio'));
     //$group->post('/load', ProductController::class . '::Load');
     //$group->get('/download', ProductController::class . '::Download');
 });
 
 $app->group('/tables', function (RouteCollectorProxy $group) {
-    $group->get('[/]', TableController::class . ':GetAll');
-    $group->get('/{id}', TableController::class . ':Get');
-    $group->post('[/]', TableController::class . ':Add');
-    $group->put('/{id}', TableController::class . ':Update');
-    $group->delete('/{id}', TableController::class . ':Delete');
+    $group->get('[/]', TableController::class . ':GetAll')->add(new AuthMiddleware('socio'));
+    $group->get('/{id}', TableController::class . ':Get')->add(new AuthMiddleware('mozo'));
+    $group->post('[/]', TableController::class . ':Add')->add(new AuthMiddleware('mozo'));
+    $group->put('/{id}', TableController::class . ':Update')->add(new AuthMiddleware('socio'));
+    $group->delete('/{id}', TableController::class . ':Delete')->add(new AuthMiddleware('socio'));
     //$group->get('/cuenta/{codigoPedido}', TableController::class . '::CuentaMesa')->add(\Autentificador::class . '::ValidarMozo');
     //$group->get('/cobrar/{codigoPedido}', TableController::class . '::CobrarMesa')->add(\Autentificador::class . '::ValidarMozo');
     //$group->get('/cerrar/{id}', TableController::class . '::CerrarMesa')->add(\Autentificador::class . '::ValidarSocio');
@@ -77,20 +80,25 @@ $app->group('/tables', function (RouteCollectorProxy $group) {
 });
 
 $app->group('/orders', function (RouteCollectorProxy $group) {
-    $group->get('[/]', OrderController::class . '::GetAll');
-    $group->get('/{id}', OrderController::class . '::Get');
-    $group->post('[/]', OrderController::class . '::Add');
-    $group->put('[/{id}]', OrderController::class . '::Update');
-    $group->delete('[/{id}]', OrderController::class . '::Delete');
+    $group->get('[/]', OrderController::class . '::GetAll')->add(new AuthMiddleware('mozo'));
+    $group->get('/{id}', OrderController::class . '::Get')->add(new AuthMiddleware('mozo'));
+    $group->post('[/]', OrderController::class . '::Add')->add(new AuthMiddleware('mozo'));
+    $group->put('[/{id}]', OrderController::class . '::Update')->add(new AuthMiddleware('mozo'));
+    $group->delete('[/{id}]', OrderController::class . '::Delete')->add(new AuthMiddleware('socio'));
     //$group->get('/listos', OrderController::class . '::TraerListos');
     //$group->get('/pendientes', OrderController::class . '::TraerPendientes');
     //$group->post('/inicio/{id}', OrderController::class . '::IniciarPedido');
     //$group->post('/final/{id}', OrderController::class . '::FinalizarPedido');
     //$group->post('/entregar/{id}', OrderController::class . '::EntregarPedido');
     //$group->get('/{codigoMesa}-{codigoPedido}', OrderController::class . '::TraerPedidosMesa');
-
 });
 
+// LOG IN
+$app->group('/login', function (RouteCollectorProxy $group) {
+    $group->post('[/]', UserController::class . '::LogIn')->add(Logger::class . '::LoginValidation');
+});
+
+// API RUN CONFIRMATION
 $app->get('[/]', function (Request $request, Response $response) {    
     $payload = json_encode(array("mensaje" => "API Comandas funcionando."));
     

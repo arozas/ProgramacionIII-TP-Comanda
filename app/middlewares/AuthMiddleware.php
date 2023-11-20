@@ -2,8 +2,14 @@
 
 class AuthMiddleware
 {
+    private $userType;
 
-    public static function AuthUser($request, $handler)
+    public function __construct($userType)
+    {
+        $this->userType = $userType;
+    }
+
+    public function __invoke($request, $handler)
     {
         $cookies = $request->getCookieParams();
         $token = $cookies['token'];
@@ -11,18 +17,12 @@ class AuthMiddleware
         AuthJWT::TokenVerifcation($token);
         $payload = AuthJWT::GetData($token);
 
-        if ($payload->rol == 'socio') {
+        // Validar el tipo de usuario
+        if ('socio' == $payload->rol || $this->userType == $payload->rol) {
+            echo(ucfirst($this->userType) . " logueado:");
             return $handler->handle($request);
         }
 
-        if ($payload->rol == 'socio' || $payload->rol == 'mozo') {
-            return $handler->handle($request);
-        }
-
-        if ($payload->rol == 'socio' || $payload->rol == 'cocinero' || $payload->rol == 'cervecero' || $payload->rol == 'bartender' || $payload->rol == 'candybar') {
-            return $handler->handle($request);
-        }
-
-        throw new Exception("Token no valido");
+        throw new Exception("Token no válido para el tipo de usuario especificado");
     }
 }

@@ -19,8 +19,8 @@ class AuthJWT
         );
 
 
-        $retorno = array('token' => $payload, 'jwt' => JWT::encode($payload, self::$claveSecreta));
-        return $retorno;
+        $rtn = array('token' => $payload, 'jwt' => JWT::encode($payload, self::$secretWord));
+        return $rtn;
     }
 
     public static function TokenVerifcation($token)
@@ -29,7 +29,7 @@ class AuthJWT
             throw new Exception("El token está vacío.");
         }
         try {
-            $decodificado = JWT::decode(
+            $deco = JWT::decode(
                 $token,
                 self::$secretWord,
                 self::$encryptType
@@ -37,7 +37,7 @@ class AuthJWT
         } catch (Exception $e) {
             throw $e;
         }
-        if ($decodificado->aud !== self::Aud()) {
+        if ($deco->aud !== self::Aud()) {
             throw new Exception("No es el usuario valido");
         }
     }

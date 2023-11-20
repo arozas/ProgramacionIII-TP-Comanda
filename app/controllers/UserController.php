@@ -3,6 +3,7 @@
 require_once './interfaces/IApiUse.php';
 require_once './models/User.php';
 require_once './services/UserService.php';
+require_once './middlewares/AuthJWT.php';
 
 class UserController implements IApiUse
 {
@@ -104,6 +105,25 @@ class UserController implements IApiUse
 
             $payload = json_encode(array("mensaje" => "ID no coincide con un usuario"));
         }
+
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    public static function LogIn($request, $response, $args)
+    {
+        $parametros = $request->getParsedBody();
+        $user = $parametros['usuario'];
+
+        $userAux = UserService::getOneByUsername($user);
+
+        $data = array('usuario' => $userAux->id, 'rol' => $userAux->userType, 'clave' => $userAux->password);
+        $creacion = AuthJWT::TokenCreate($data);
+
+        $response = $response->withHeader('Set-Cookie', 'token=' . $creacion['jwt']);
+
+        $payload = json_encode(array("mensaje" => "Usuario logeado, cookie entregada", "token" => $creacion['jwt']));
 
         $response->getBody()->write($payload);
         return $response
