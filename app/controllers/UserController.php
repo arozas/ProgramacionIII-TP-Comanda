@@ -2,6 +2,7 @@
 
 require_once './interfaces/IApiUse.php';
 require_once './models/User.php';
+require_once './services/UserService.php';
 
 class UserController implements IApiUse
 {
@@ -17,7 +18,7 @@ class UserController implements IApiUse
         $user->password = $password;
         $user->userType = $userType;
 
-        User::create($user);
+        UserService::create($user);
         $payload = json_encode(array("mensaje" => "Usuario creado con exito"));
 
         $response->getBody()->write($payload);
@@ -29,7 +30,7 @@ class UserController implements IApiUse
     {
 
         $userID = $args['id'];
-        $user = User::getOne($userID);
+        $user = UserService::getOne($userID);
         if(!$user)
         {
             $user = array("error" => "Usuario no existe");
@@ -44,7 +45,7 @@ class UserController implements IApiUse
     public static function GetAll($request, $response, $args)
     {
 
-        $userList = User::getAll();
+        $userList = UserService::getAll();
         $payload = json_encode(array("listaUsuario" => $userList));
         $response->getBody()->write($payload);
         return $response
@@ -56,7 +57,7 @@ class UserController implements IApiUse
 
         $id = $args['id'];
 
-        $user = User::getOne($id);
+        $user = UserService::getOne($id);
 
         if ($user != false) {
             $parameters = $request->getParsedBody();
@@ -76,7 +77,7 @@ class UserController implements IApiUse
             }
 
             if ($updated) {
-                User::update($user);
+                UserService::update($user);
                 $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
             } else {
                 $payload = json_encode(array("mensaje" => "Usuario no modificar por falta de campos"));
@@ -95,9 +96,9 @@ class UserController implements IApiUse
     {
         $userID = $args['id'];
 
-        if (User::getOne($userID)) {
+        if (UserService::getOne($userID)) {
 
-            User::delete($userID);
+            UserService::delete($userID);
             $payload = json_encode(array("mensaje" => "Usuario borrado con exito"));
         } else {
 

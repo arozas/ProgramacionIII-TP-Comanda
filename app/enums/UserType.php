@@ -7,4 +7,9 @@ enum UserType: string
     case COOKER = 'cocinero';
     case WAITER = 'mozo';
     case CANDYBAR = 'candybar';
+
+    public function getStringValue(): string
+    {
+        return $this->value;
+    }
 }

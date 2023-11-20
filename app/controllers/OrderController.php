@@ -2,6 +2,7 @@
 
 require_once './interfaces/IApiUse.php';
 require_once './models/Order.php';
+require_once './services/OrderService.php';
 
 class OrderController implements IApiUse
 {
@@ -27,20 +28,20 @@ class OrderController implements IApiUse
             $order->tableImage = $targetPath;
         }
 
-        $table =Table::getOne($tableId);
+        $table =TableService::getOne($tableId);
 
         if($table != false)
         {
             if ($table->status == TableStatus::CLOSE->getStringValue())
             {
-                $order->orderID = Table::generateCode(5);
+                $order->orderID = TableService::generateCode(5);
                 $table->status = TableStatus::WAITING->getStringValue();
-                Table::update($table);
+                TableService::update($table);
             } else {
-                $order->orderID = Order::getLastId($tableId);
+                $order->orderID = OrderService::getLastId($tableId);
             }
 
-            Order::create($order);
+            OrderService::create($order);
 
             $payload = json_encode(array("mensaje" => "Pedido creado con exito"));
         }else{
@@ -55,7 +56,7 @@ class OrderController implements IApiUse
     public static function Get($request, $response, $args)
     {
         $id = $args['id'];
-        $order = Order::getOne($id);
+        $order = OrderService::getOne($id);
         $payload = json_encode($order);
 
         $response->getBody()->write($payload);
@@ -65,7 +66,7 @@ class OrderController implements IApiUse
 
     public static function GetAll($request, $response, $args)
     {
-        $orderList = Order::getAll();
+        $orderList = OrderService::getAll();
         $payload = json_encode(array("listaPedidos" => $orderList));
 
         $response->getBody()->write($payload);
@@ -78,7 +79,7 @@ class OrderController implements IApiUse
         $parameters = $request->getParsedBody();
 
         $orderId = $parameters['pedidoId'];
-        Order::delete($orderId);
+        OrderService::delete($orderId);
 
         $payload = json_encode(array("mensaje" => "pedido borrado con exito"));
 
@@ -91,7 +92,7 @@ class OrderController implements IApiUse
 
         $id = $args['id'];
 
-        $orderAux = Order::getOne($id);
+        $orderAux = OrderService::getOne($id);
 
         if($orderAux != false)
         {
@@ -119,7 +120,7 @@ class OrderController implements IApiUse
             }
 
             if ($updated) {
-                Order::update($orderAux);
+                OrderService::update($orderAux);
                 $payload = json_encode(array("mensaje" => "Orden modificada con exito"));
             } else {
                 $payload = json_encode(array("mensaje" => "La Orden no se puede modificar por falta de campos"));

@@ -6,4 +6,8 @@ enum ProductType: string
     case DRINK = 'bebida';
     case DESSERT = 'postre';
 
+    public function getStringValue(): string
+    {
+        return $this->value;
+    }
 }

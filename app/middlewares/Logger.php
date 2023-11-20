@@ -1,5 +1,5 @@
 <?php
-require_once './models/User.php';
+require_once './services/UserService.php';
 class Logger
 {
     public static function LogOperacion($request, $response, $next)
@@ -13,7 +13,7 @@ class Logger
         $parameters = $request->getParsedBody();
         $user = $parameters['usuario'];
         $password = $parameters['clave'];
-        $userAux = User::getUser($user);
+        $userAux = UserService::getUser($user);
 
         if ($userAux != false && password_verify($password, $userAux->password)) {
             return $handler->handle($request);

@@ -2,6 +2,7 @@
 
 require_once './interfaces/IApiUse.php';
 require_once './models/Product.php';
+require_once './services/ProductService.php';
 
 class ProductController implements IApiUse
 {
@@ -24,7 +25,7 @@ class ProductController implements IApiUse
         $prod->stock = $productStock;
         $prod->active = true;
 
-        Product::create($prod);
+        ProductService::create($prod);
 
         $payload = json_encode(array("mensaje" => "Producto creado con exito"));
 
@@ -35,7 +36,7 @@ class ProductController implements IApiUse
     public static function Get($request, $response, $args)
     {
         $id = $args['id'];
-        $product = Product::getOne($id);
+        $product = ProductService::getOne($id);
         $payload = json_encode($product);
 
         $response->getBody()->write($payload);
@@ -44,7 +45,7 @@ class ProductController implements IApiUse
 
     public static function GetAll($request, $response, $args)
     {
-        $productList = Product::getAll();
+        $productList = ProductService::getAll();
         $payload = json_encode(array("listaProductos" => $productList));
 
         $response->getBody()->write($payload);
@@ -56,8 +57,8 @@ class ProductController implements IApiUse
     {
         $id = $args['id'];
 
-        if (Product::getOne($id)) {
-            Product::delete($id);
+        if (ProductService::getOne($id)) {
+            ProductService::delete($id);
             $payload = json_encode(array("mensaje" => "Producto borrado con exito"));
         } else {
 
@@ -73,7 +74,7 @@ class ProductController implements IApiUse
     {
         $id = $args['id'];
 
-        $productAux = Product::getOne($id);
+        $productAux = ProductService::getOne($id);
 
         if ($productAux != false) {
             $parmeters = $request->getParsedBody();
@@ -101,7 +102,7 @@ class ProductController implements IApiUse
             }
 
             if ($updated) {
-                Product::update($productAux);
+                ProductService::update($productAux);
                 $payload = json_encode(array("mensaje" => "Producto modificado con exito"));
             } else {
                 $payload = json_encode(array("mensaje" => "Producto no modificar por falta de campos"));

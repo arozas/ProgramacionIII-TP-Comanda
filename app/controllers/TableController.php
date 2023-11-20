@@ -1,12 +1,13 @@
 <?php
 require_once './interfaces/IApiUse.php';
 require_once './models/Table.php';
+require_once './services/TableService.php';
 class TableController implements IApiUse
 {
     public static function Add($request, $response, $args)
     {
         $dummyObject = null;
-        Table::create($dummyObject);
+        TableService::create($dummyObject);
         $payload = json_encode(array("mensaje" => "Mesa creada con exito"));
         $response->getBody()->write($payload);
         return $response
@@ -16,7 +17,7 @@ class TableController implements IApiUse
     public static function Get($request, $response, $args)
     {
         $id = $args['id'];
-        $table = Table::getOne($id);
+        $table = TableService::getOne($id);
         $payload = json_encode($table);
 
         $response->getBody()->write($payload);
@@ -26,7 +27,7 @@ class TableController implements IApiUse
 
     public static function GetAll($request, $response, $args)
     {
-        $tableList = Table::getAll();
+        $tableList = TableService::getAll();
         $payload = json_encode(array("listaMesas" => $tableList));
 
         $response->getBody()->write($payload);
@@ -37,8 +38,8 @@ class TableController implements IApiUse
     public static function Delete($request, $response, $args)
     {
         $id = $args['id'];
-        if (Table::getOne($id)) {
-            Table::delete($id);
+        if (TableService::getOne($id)) {
+            TableService::delete($id);
             $payload = json_encode(array("mensaje" => "mesa borrada con exito"));
         } else {
             $payload = json_encode(array("mensaje" => "ID no coinciden con ninguna Mesa"));
@@ -52,7 +53,7 @@ class TableController implements IApiUse
     {
         $id = $args['id'];
 
-        $table = Table::getOne($id);
+        $table = TableService::getOne($id);
 
         if ($table != false) {
             $parameters = $request->getParsedBody();
@@ -65,7 +66,7 @@ class TableController implements IApiUse
             }
 
             if ($updated) {
-                Table::update($table);
+                TableService::update($table);
                 $payload = json_encode(array("mensaje" => "Mesa modificada con exito"));
             } else {
                 $payload = json_encode(array("mensaje" => "Mesa no modificada por falta de campos"));

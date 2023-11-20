@@ -1,5 +1,7 @@
 <?php
 
+require_once './services/UserService.php';
+
 class UserTypeValidator
 {
 
@@ -7,13 +9,28 @@ class UserTypeValidator
     {
         $parametros = $request->getParsedBody();
 
-        $usuario = $parametros['usuario'];
-        $rol = $parametros['rol'];
-        $clave = $parametros['clave'];
-        if (Usuario::ValidarRol($rol) && Usuario::ValidarUserName($usuario) == null) {
+        $username = $parametros['usuario'];
+        $userType = $parametros['rol'];
+        if (UserService::UserTypeValidation($userType) && UserService::UserNameValidation($username) == null) {
             return $handler->handle($request);
         }
 
         throw new Exception("Error en la creacion del Usuario");
+    }
+
+    public static function FileValidation($request, $handler)
+    {
+        $uploadedFiles = $request->getUploadedFiles();
+
+        if (isset($uploadedFiles['csv'])) {
+
+            if (preg_match('/\.csv$/i', $uploadedFiles['csv']->getClientFilename()) == 0){
+                throw new Exception("Debe ser un archivo CSV");
+            }
+
+            return $handler->handle($request);
+        }
+
+        throw new Exception("Error no se recibio el archivo");
     }
 }
