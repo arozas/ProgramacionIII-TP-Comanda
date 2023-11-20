@@ -102,4 +102,31 @@ class OrderService implements IPersistance
 
         return $request->fetchColumn();
     }
+
+    public static function getFoodOrders()
+    {
+        $DAO = DataAccessObject::getInstance();
+        $request = $DAO->prepareRequest("SELECT * FROM orders WHERE productID IN (SELECT id FROM products WHERE productType = 'comida')");
+        $request->execute();
+
+        return $request->fetchAll(PDO::FETCH_CLASS, 'Order');
+    }
+
+    public static function getBeerOrders()
+    {
+        $DAO = DataAccessObject::getInstance();
+        $request = $DAO->prepareRequest("SELECT * FROM orders WHERE productID IN (SELECT id FROM products WHERE productType = 'cerveza')");
+        $request->execute();
+
+        return $request->fetchAll(PDO::FETCH_CLASS, 'Order');
+    }
+
+    public static function getDrinkOrders()
+    {
+        $DAO = DataAccessObject::getInstance();
+        $request = $DAO->prepareRequest("SELECT * FROM orders WHERE productID IN (SELECT id FROM products WHERE productType = 'bebida')");
+        $request->execute();
+
+        return $request->fetchAll(PDO::FETCH_CLASS, 'Order');
+    }
 }

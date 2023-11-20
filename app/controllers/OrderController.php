@@ -66,12 +66,30 @@ class OrderController implements IApiUse
 
     public static function GetAll($request, $response, $args)
     {
-        $orderList = OrderService::getAll();
-        $payload = json_encode(array("listaPedidos" => $orderList));
+        $userType = AuthMiddleware::getUserTypeFromToken($request);
+        $orderList = [];
 
+        switch ($userType) {
+            case UserType::COOKER->getStringValue():
+                $orderList = OrderService::getFoodOrders();
+                break;
+
+            case UserType::BREWER->getStringValue():
+                $orderList = OrderService::getBeerOrders();
+                break;
+
+            case UserType::BARTENDER->getStringValue():
+                $orderList = OrderService::getDrinkOrders();
+                break;
+
+            default:
+                $orderList = OrderService::getAll();
+                break;
+        }
+
+        $payload = json_encode(array("listaPedidos" => $orderList));
         $response->getBody()->write($payload);
-        return $response
-            ->withHeader('Content-Type', 'application/json');
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     public static function Delete($request, $response, $args)
