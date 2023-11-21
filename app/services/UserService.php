@@ -1,6 +1,6 @@
 <?php
 require_once './interfaces/IPersistance.php';
-require_once './Database/DataAccessObject.php';
+require_once './database/DataAccessObject.php';
 require_once './enums/UserType.php';
 require_once './models/User.php';
 require_once './models/dto/UserDTO.php';

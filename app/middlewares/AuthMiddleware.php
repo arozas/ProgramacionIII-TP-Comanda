@@ -8,7 +8,7 @@ class AuthMiddleware
     public function __construct()
     {
         $config = require(__DIR__ . '/../config.php');
-        $userType = $this->getUserType();
+        $userType = AuthMiddleware::getUserType();
         $this->allowedRoutes = $config['user_types'][$userType]['allowed_routes'];
     }
 
@@ -26,8 +26,8 @@ class AuthMiddleware
             AuthJWT::TokenVerifcation($token);
             $payload = AuthJWT::GetData($token);
 
-            if ($payload->rol == $this->getUserType()) {
-                echo(ucfirst($this->getUserType()) . " logueado:");
+            if ($payload->rol == AuthMiddleware::getUserType()) {
+                echo(ucfirst(AuthMiddleware::getUserType()) . " logueado:");
                 return $handler->handle($request);
             }
 
@@ -75,8 +75,35 @@ class AuthMiddleware
 
         return true;
     }
+    public static function getUserId()
+    {
+        try {
+            $cookies = $_COOKIE;
+            $token = $cookies['token'];
 
-    private function getUserType()
+            $payload = AuthJWT::GetData($token);
+
+            return $payload->id;
+        } catch (Exception $e) {
+            throw new Exception("No se pudo obtener el tipo de usuario.");
+        }
+    }
+
+    public static function getUserName()
+    {
+        try {
+            $cookies = $_COOKIE;
+            $token = $cookies['token'];
+
+            $payload = AuthJWT::GetData($token);
+
+            return $payload->usuario;
+        } catch (Exception $e) {
+            throw new Exception("No se pudo obtener el tipo de usuario.");
+        }
+    }
+
+    public static function getUserType()
     {
         try {
             $cookies = $_COOKIE;
@@ -90,14 +117,5 @@ class AuthMiddleware
         }
     }
 
-    public static function getUserTypeFromToken($request)
-    {
-        $cookies = $request->getCookieParams();
-        $token = $cookies['token'];
 
-        AuthJWT::TokenVerifcation($token);
-        $payload = AuthJWT::GetData($token);
-
-        return $payload->rol;
-    }
 }

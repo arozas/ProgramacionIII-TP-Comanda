@@ -58,7 +58,7 @@ class OrderController implements IApiUse
     public static function Get($request, $response, $args)
     {
         $id = $args['id'];
-        $userType = AuthMiddleware::getUserTypeFromToken($request);
+        $userType = AuthMiddleware::getUserType($request);
 
         switch ($userType) {
             case UserType::COOKER->getStringValue():
@@ -92,7 +92,7 @@ class OrderController implements IApiUse
 
     public static function GetAll($request, $response, $args)
     {
-        $userType = AuthMiddleware::getUserTypeFromToken($request);
+        $userType = AuthMiddleware::getUserType($request);
         $orderList = [];
 
         switch ($userType) {
@@ -184,7 +184,7 @@ class OrderController implements IApiUse
     public static function PrepareOrder($request, $response, $args)
     {
         $id = $args['id'];
-        $userType = AuthMiddleware::getUserTypeFromToken($request);
+        $userType = AuthMiddleware::getUserType($request);
 
         switch ($userType) {
             case UserType::COOKER->getStringValue():
@@ -233,7 +233,7 @@ class OrderController implements IApiUse
     public static function CompletedOrder($request, $response, $args)
     {
         $id = $args['id'];
-        $userType = AuthMiddleware::getUserTypeFromToken($request);
+        $userType = AuthMiddleware::getUserType($request);
         $payload = json_encode(array("mensaje" => "Orden en terminada."));
 
         switch ($userType) {

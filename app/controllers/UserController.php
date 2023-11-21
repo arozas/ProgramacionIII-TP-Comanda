@@ -118,7 +118,7 @@ class UserController implements IApiUse
 
         $userAux = UserService::getOneByUsername($user);
 
-        $data = array('usuario' => $userAux->id, 'rol' => $userAux->userType, 'clave' => $userAux->password);
+        $data = array('id'=> $userAux->id ,'usuario' => $userAux->user, 'rol' => $userAux->userType, 'clave' => $userAux->password);
         $creacion = AuthJWT::TokenCreate($data);
 
         $response = $response->withHeader('Set-Cookie', 'token=' . $creacion['jwt']);
