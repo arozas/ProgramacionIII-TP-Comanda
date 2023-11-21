@@ -19,6 +19,7 @@ return [
 
                 'GET:/app/tables/',
                 'GET:/app/tables/{id}',
+                'GET:/app/tables/manageBill/{orderId}',
                 'POST:/app/tables/',
                 'PUT:/app/tables/{id}',
                 'DELETE:/app/tables/{id}',
@@ -28,6 +29,9 @@ return [
                 'POST:/app/orders/',
                 'PUT:/app/orders/{id}',
                 'DELETE:/app/orders/{id}',
+
+                'GET:/app/surveys/',
+                'GET:/app/surveys/{id}',
             ],
         ],
         'mozo' => [
@@ -37,6 +41,7 @@ return [
 
                 'GET:/app/tables/',
                 'GET:/app/tables/{id}',
+                'GET:/app/tables/manageBill/{orderId}',
                 'PUT:/app/tables/{id}',
 
                 'GET:/app/orders/',

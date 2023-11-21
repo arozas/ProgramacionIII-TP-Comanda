@@ -124,6 +124,19 @@ class OrderService implements IPersistance
         return $request->fetchAll(PDO::FETCH_CLASS, 'Order');
     }
 
+    public static function verifiedOrderByTable($tableId, $orderId, $status)
+    {
+        $orders = self::getOrdersByTable($tableId, $orderId);
+
+        foreach ($orders as $order) {
+            if ($order->status != $status) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static function getOrdersByTable($tableID, $orderId)
     {
         $DAO = DataAccessObject::getInstance();

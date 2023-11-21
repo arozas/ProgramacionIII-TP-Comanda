@@ -253,11 +253,29 @@ class OrderController implements IApiUse
                 break;
 
             case UserType::WAITER->getStringValue():
-                $orderAux = OrderService::getOneOrderByStatus($id, null, OrderStatus::READY->getStringValue());
-                $orderAux->status = OrderStatus::DELIVERED->getStringValue();
-                $orderAux->servedTime = (new DateTime())->format('H:i:s');
-                $payload = json_encode(array("mensaje" => "Orden en entregada."));
+                $orderAux = OrderService::getOneOrderByStatus($id, null,OrderStatus::READY->getStringValue());
+
+                if ($orderAux != false) {
+                    $tableId = $orderAux->tableID;
+                    $orderId = $orderAux->orderID;
+                    $table = TableService::getOne($tableId);
+                    $orderAux->status = OrderStatus::DELIVERED->getStringValue();
+                    OrderService::update($orderAux);
+                    $allDelivered = OrderService::verifiedOrderByTable($tableId, $orderId, OrderStatus::DELIVERED->getStringValue());
+
+                    if ($allDelivered) {
+                        $table->status = TableStatus::SERVED->getStringValue();
+                        TableService::update($table);
+
+                        $payload = json_encode(array("mensaje" => "Todos los pedidos entregados. Estado de la mesa cambiado a comiendo."));
+                    } else {
+                        $payload = json_encode(array("mensaje" => "Orden entregada, pero algunos pedidos de la mesa aún no están listos."));
+                    }
+                } else {
+                    $payload = json_encode(array("mensaje" => "ID no coinciden con ninguna Orden de su sector o existente"));
+                }
                 break;
+
 
             default:
                 $orderAux = OrderService::getOne($id);

@@ -70,6 +70,7 @@ $app->group('/products', function (RouteCollectorProxy $group) {
 $app->group('/tables', function (RouteCollectorProxy $group) {
     $group->get('[/]', TableController::class . ':GetAll')->add(new AuthMiddleware());
     $group->get('/{id}', TableController::class . ':Get')->add(new AuthMiddleware());
+    $group->get('/manageBill/{orderId}', TableController::class . ':ManageBill')->add(new AuthMiddleware());
     $group->post('[/]', TableController::class . ':Add')->add(new AuthMiddleware());
     $group->put('/{id}', TableController::class . ':Update')->add(new AuthMiddleware());
     $group->delete('/{id}', TableController::class . ':Delete')->add(new AuthMiddleware());
@@ -84,6 +85,12 @@ $app->group('/orders', function (RouteCollectorProxy $group) {
     $group->put('/prepare/{id}', OrderController::class . '::PrepareOrder')->add(new AuthMiddleware());
     $group->put('/completed/{id}', OrderController::class . '::CompletedOrder')->add(new AuthMiddleware());
     $group->delete('/{id}', OrderController::class . '::Delete')->add(new AuthMiddleware());
+});
+
+$app->group('/surveys', function (RouteCollectorProxy $group) {
+    $group->get('[/]', SurveyController::class . '::GetAll')->add(new AuthMiddleware());
+    $group->get('/{id}', SurveyController::class . '::Get')->add(new AuthMiddleware());
+    $group->post('[/]', SurveyController::class . '::Add');
 });
 
 // LOG IN

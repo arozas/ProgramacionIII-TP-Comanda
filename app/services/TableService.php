@@ -52,6 +52,29 @@ class TableService implements IPersistance
         $request->execute();
     }
 
+    public static function getBill($orderId)
+    {
+        $DAO = DataAccessObject::getInstance();
+        $request = $DAO->prepareRequest("SELECT o.tableID , SUM(pr.price) as Total FROM orders as o 
+                                             INNER JOIN products as pr ON o.productID = pr.id
+                                             WHERE o.orderID = :orderId");
+        $request->bindValue(':orderId', $orderId, PDO::PARAM_STR);
+        $request->execute();
+        return $request->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function getTableByOrderId($orderId)
+    {
+        $DAO = DataAccessObject::getInstance();
+        $request = $DAO->prepareRequest("SELECT t.id, t.status
+                                             FROM tables as t
+                                             INNER JOIN orders as o ON o.tableID = t.id
+                                             WHERE o.orderID = :orderId;");
+        $request->bindValue(':orderId', $orderId, PDO::PARAM_STR);
+        $request->execute();
+        return $request->fetchObject('Table');
+    }
+
     public static function generateCode($length)
     {
         $letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

@@ -1,21 +1,16 @@
 <?php
-require_once './models/dto/OrderDTO.php';
-require_once './enums/OrderStatus.php';
 
-class Order
+class Survey
 {
     public $id;
     public $orderID;
     public $tableID;
-    public $productID;
-    public $clientName;
-    public $tableImage;
-    public $status;
-    public $orderTime;
-    public $preparationTime;
-    public $servedTime;
-    public $modifiedDate;
-    public $active;
+    public $restoRating;
+    public $tableRating;
+    public $waiterRating;
+    public $cookerRating;
+    public $comments;
+    public $date;
 
     public function __get($property)
     {
@@ -34,4 +29,5 @@ class Order
             echo "No existe " . $property;
         }
     }
+
 }
