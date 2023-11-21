@@ -62,7 +62,9 @@ $app->group('/users', function (RouteCollectorProxy $group) {
 $app->group('/products', function (RouteCollectorProxy $group) {
     $group->get('[/]', ProductController::class . ':GetAll')->add(new AuthMiddleware());
     $group->get('/{id}', ProductController::class . ':Get')->add(new AuthMiddleware());
+    $group->get('/download/', ProductController::class . ':DownloadFile')->add(new AuthMiddleware());
     $group->post('[/]', ProductController::class . ':Add')->add(new AuthMiddleware());
+    $group->post('/load/', ProductController::class . ':LoadFile')->add(new AuthMiddleware());
     $group->put('/{id}', ProductController::class . ':Update')->add(new AuthMiddleware());
     $group->delete('/{id}', ProductController::class . ':Delete')->add(new AuthMiddleware());
 });

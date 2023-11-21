@@ -13,7 +13,9 @@ return [
 
                 'GET:/app/products/',
                 'GET:/app/products/{id}',
+                'GET:/app/products/download/',
                 'POST:/app/products/',
+                'POST:/app/products/load/',
                 'PUT:/app/products/{id}',
                 'DELETE:/app/products/{id}',
 

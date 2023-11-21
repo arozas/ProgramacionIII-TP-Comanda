@@ -115,4 +115,53 @@ class ProductController implements IApiUse
         return $response
             ->withHeader('Content-Type', 'application/json');
     }
+
+    public static function DownloadFile($request, $response, $args)
+    {
+        $productList = ProductService::getAll();
+
+        $stream = fopen('php://temp', 'w+');
+        foreach ($productList as $p) {
+            fputcsv($stream, get_object_vars($p));
+        }
+
+        $response = $response->withHeader('Content-Type', 'application/csv');
+        $response = $response->withHeader('Pragma', 'no-cache');
+        $response = $response->withHeader('Expires', '0');
+        $response = $response->withBody(new \Slim\Psr7\Stream($stream));
+        return $response;
+    }
+
+    public static function LoadFile($request, $response, $args)
+    {
+        $CSVFile = $request->getUploadedFiles()['csv'];
+        $stream = $CSVFile->getStream();
+        $content = ($stream)->getContents();
+        $lines = explode("\n", $content);
+
+        $productoList = [];
+        foreach ($lines as $l) {
+            $data = str_getcsv($l);
+            if (empty(trim($l))) {
+                break;
+            }
+            if (ProductService::NameValidation($data[0]) != null || !ProductService::ProductTypeValidation($data[1])) {
+                throw new Exception("Fallo en la carga por validacion de datos");
+            }
+            $product = new Product();
+            $product->descripcion = $data[0];
+            $product->tipo = $data[1];
+            $product->precio = $data[2];
+            $productoList[] = $product;
+        }
+
+        ProductService::createList($productoList);
+        $payload = json_encode(array("mensaje" => "Archivo cargado con exito"));
+
+
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
+
 }
