@@ -3,6 +3,8 @@
 require_once './interfaces/IApiUse.php';
 require_once './models/Order.php';
 require_once './services/OrderService.php';
+require_once './enums/ProductType.php';
+require_once './enums/OrderStatus.php';
 
 class OrderController implements IApiUse
 {
@@ -56,8 +58,32 @@ class OrderController implements IApiUse
     public static function Get($request, $response, $args)
     {
         $id = $args['id'];
-        $order = OrderService::getOne($id);
-        $payload = json_encode($order);
+        $userType = AuthMiddleware::getUserTypeFromToken($request);
+
+        switch ($userType) {
+            case UserType::COOKER->getStringValue():
+                $order = OrderService::getOneOrderByStatus($id, ProductType::FOOD->getStringValue(),OrderStatus::PENDING->getStringValue());
+                break;
+
+            case UserType::BREWER->getStringValue():
+                $order = OrderService::getOneOrderByStatus($id, ProductType::BEER->getStringValue(),OrderStatus::PENDING->getStringValue());
+                break;
+
+            case UserType::BARTENDER->getStringValue():
+                $order = OrderService::getOneOrderByStatus($id, ProductType::DRINK->getStringValue(),OrderStatus::PENDING->getStringValue());
+                break;
+
+            default:
+                $order = OrderService::getOne($id);
+                break;
+        }
+
+        if($order != false)
+        {
+            $payload = json_encode($order);
+        } else {
+            $payload = json_encode(array("mensaje" => "ID no coinciden con ninguna Orden de su sector o existente"));
+        }
 
         $response->getBody()->write($payload);
         return $response
@@ -71,15 +97,19 @@ class OrderController implements IApiUse
 
         switch ($userType) {
             case UserType::COOKER->getStringValue():
-                $orderList = OrderService::getFoodOrders();
+                $orderList = OrderService::getOrdersByStatus(ProductType::FOOD->getStringValue(),OrderStatus::PENDING->getStringValue());
                 break;
 
             case UserType::BREWER->getStringValue():
-                $orderList = OrderService::getBeerOrders();
+                $orderList = OrderService::getOrdersByStatus(ProductType::BEER->getStringValue(),OrderStatus::PENDING->getStringValue());
                 break;
 
             case UserType::BARTENDER->getStringValue():
-                $orderList = OrderService::getDrinkOrders();
+                $orderList = OrderService::getOrdersByStatus(ProductType::DRINK->getStringValue(),OrderStatus::PENDING->getStringValue());
+                break;
+
+            case UserType::WAITER->getStringValue():
+                $orderList = OrderService::getOrdersByStatus(null ,OrderStatus::READY->getStringValue());
                 break;
 
             default:
@@ -146,6 +176,120 @@ class OrderController implements IApiUse
         }else {
             $payload = json_encode(array("mensaje" => "ID no coinciden con ninguna Orden"));
         }
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    public static function PrepareOrder($request, $response, $args)
+    {
+        $id = $args['id'];
+        $userType = AuthMiddleware::getUserTypeFromToken($request);
+
+        switch ($userType) {
+            case UserType::COOKER->getStringValue():
+                $orderAux = OrderService::getOneOrderByStatus($id, ProductType::FOOD->getStringValue(),OrderStatus::PENDING->getStringValue());
+                break;
+
+            case UserType::BREWER->getStringValue():
+                $orderAux = OrderService::getOneOrderByStatus($id, ProductType::BEER->getStringValue(),OrderStatus::PENDING->getStringValue());
+                break;
+
+            case UserType::BARTENDER->getStringValue():
+                $orderAux = OrderService::getOneOrderByStatus($id, ProductType::DRINK->getStringValue(),OrderStatus::PENDING->getStringValue());
+                break;
+
+            default:
+                $orderAux = OrderService::getOne($id);
+                break;
+        }
+
+        if($orderAux != false)
+        {
+            $parameters = $request->getParsedBody();
+            $updated = false;
+
+            if(isset($parameters['preparationTime']))
+            {
+                $updated = true;
+                $orderAux->preparationTime = $parameters['preparationTime'];
+            }
+
+            if ($updated) {
+                $orderAux->status = OrderStatus::PREPARATION->getStringValue();
+                OrderService::update($orderAux);
+                $payload = json_encode(array("mensaje" => "Orden en preparación."));
+            } else {
+                $payload = json_encode(array("mensaje" => "La Orden no se puede modificar por falta de campos"));
+            }
+        }else {
+            $payload = json_encode(array("mensaje" => "ID no coinciden con ninguna Orden de su sector o existente"));
+        }
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    public static function CompletedOrder($request, $response, $args)
+    {
+        $id = $args['id'];
+        $userType = AuthMiddleware::getUserTypeFromToken($request);
+        $payload = json_encode(array("mensaje" => "Orden en terminada."));
+
+        switch ($userType) {
+            case UserType::COOKER->getStringValue():
+                $orderAux = OrderService::getOneOrderByStatus($id, ProductType::FOOD->getStringValue(),OrderStatus::PREPARATION->getStringValue());
+                $orderAux->status = OrderStatus::READY->getStringValue();
+                break;
+
+            case UserType::BREWER->getStringValue():
+                $orderAux = OrderService::getOneOrderByStatus($id, ProductType::BEER->getStringValue(),OrderStatus::PREPARATION->getStringValue());
+                $orderAux->status = OrderStatus::READY->getStringValue();
+                break;
+
+            case UserType::BARTENDER->getStringValue():
+                $orderAux = OrderService::getOneOrderByStatus($id, ProductType::DRINK->getStringValue(),OrderStatus::PREPARATION->getStringValue());
+                $orderAux->status = OrderStatus::READY->getStringValue();
+                break;
+
+            case UserType::WAITER->getStringValue():
+                $orderAux = OrderService::getOneOrderByStatus($id, null, OrderStatus::READY->getStringValue());
+                $orderAux->status = OrderStatus::DELIVERED->getStringValue();
+                $orderAux->servedTime = (new DateTime())->format('H:i:s');
+                $payload = json_encode(array("mensaje" => "Orden en entregada."));
+                break;
+
+            default:
+                $orderAux = OrderService::getOne($id);
+                break;
+        }
+
+        if($orderAux != false)
+        {
+            OrderService::update($orderAux);
+        }else {
+            $payload = json_encode(array("mensaje" => "ID no coinciden con ninguna Orden de su sector o existente"));
+        }
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    public static function GetTableOrders($request, $response, $args)
+    {
+
+        $tableId = $args['mesaId'];
+        $orderId = $args['orderId'];
+        $order = OrderService::getOrdersByTable($tableId, $orderId);
+
+
+        if($order != false)
+        {
+            $payload = json_encode($order);
+        } else {
+            $payload = json_encode(array("mensaje" => "ID no coinciden con ninguna Orden de su sector o existente"));
+        }
+
         $response->getBody()->write($payload);
         return $response
             ->withHeader('Content-Type', 'application/json');

@@ -8,8 +8,8 @@ class OrderService implements IPersistance
     public static function create($order)
     {
         $DAO = DataAccessObject::getInstance();
-        $request = $DAO->prepareRequest("INSERT INTO orders (orderID, tableImage, tableID, productID, clientName, status, modifiedDate, active) 
-                                             VALUES (:orderID, :tableImage, :tableID, :productID, :clientName, :status, :modifiedDate, true)");
+        $request = $DAO->prepareRequest("INSERT INTO orders (orderID, tableImage, tableID, productID, clientName, status, orderTime, modifiedDate, active) 
+                                             VALUES (:orderID, :tableImage, :tableID, :productID, :clientName, :status, :orderTime, :modifiedDate, true)");
         $request->bindValue(':orderID', $order->orderID, PDO::PARAM_STR);
         $request->bindValue(':tableImage', $order->tableImage, PDO::PARAM_STR);
         $request->bindValue(':tableID', $order->tableID, PDO::PARAM_INT);
@@ -17,6 +17,8 @@ class OrderService implements IPersistance
         $request->bindValue(':clientName', $order->clientName, PDO::PARAM_STR);
         $request->bindValue(':status', OrderStatus::PENDING->getStringValue(), PDO::PARAM_STR);
         $date = new DateTime(date("d-m-Y"));
+        $time = (new DateTime())->format('H:i:s');
+        $request->bindValue(':orderTime', $time, PDO::PARAM_STR);
         $request->bindValue(':modifiedDate', date_format($date, 'Y-m-d H:i:s'));
         $request->execute();
         return $DAO->getLastId();
@@ -103,30 +105,52 @@ class OrderService implements IPersistance
         return $request->fetchColumn();
     }
 
-    public static function getFoodOrders()
+
+
+    public static function getOrdersByStatus($productType, $status)
     {
         $DAO = DataAccessObject::getInstance();
-        $request = $DAO->prepareRequest("SELECT * FROM orders WHERE productID IN (SELECT id FROM products WHERE productType = 'comida')");
+        if($productType == null)
+        {
+            $request = $DAO->prepareRequest("SELECT * FROM orders WHERE status = :status AND active = true");
+            $request->bindValue(':status', $status, PDO::PARAM_STR);
+        }else{
+            $request = $DAO->prepareRequest("SELECT * FROM orders WHERE productID IN (SELECT id FROM products WHERE productType = :productType) AND status = :status AND active = true");
+            $request->bindValue(':productType', $productType, PDO::PARAM_STR);
+            $request->bindValue(':status', $status, PDO::PARAM_STR);
+        }
         $request->execute();
 
         return $request->fetchAll(PDO::FETCH_CLASS, 'Order');
     }
 
-    public static function getBeerOrders()
+    public static function getOrdersByTable($tableID, $orderId)
     {
         $DAO = DataAccessObject::getInstance();
-        $request = $DAO->prepareRequest("SELECT * FROM orders WHERE productID IN (SELECT id FROM products WHERE productType = 'cerveza')");
+        $request = $DAO->prepareRequest("SELECT * FROM orders WHERE orderID = :orderId AND tableID = :tableId AND active = true");
+        $request->bindValue(':tableId', $tableID, PDO::PARAM_STR);
+        $request->bindValue(':orderId', $orderId, PDO::PARAM_STR);
         $request->execute();
 
         return $request->fetchAll(PDO::FETCH_CLASS, 'Order');
     }
 
-    public static function getDrinkOrders()
+    public static function getOneOrderByStatus($id, $productType, $status)
     {
         $DAO = DataAccessObject::getInstance();
-        $request = $DAO->prepareRequest("SELECT * FROM orders WHERE productID IN (SELECT id FROM products WHERE productType = 'bebida')");
-        $request->execute();
 
-        return $request->fetchAll(PDO::FETCH_CLASS, 'Order');
+        if($productType == null)
+        {
+            $request = $DAO->prepareRequest("SELECT id, orderID, tableImage, tableID, productID, clientName, status, orderTime, preparationTime, servedTime FROM orders WHERE status = :status AND id = :id AND Active = true");
+            $request->bindValue(':id', $id, PDO::PARAM_INT);
+            $request->bindValue(':status', $status, PDO::PARAM_STR);
+        }else{
+            $request = $DAO->prepareRequest("SELECT id, orderID, tableImage, tableID, productID, clientName, status, orderTime, preparationTime, servedTime FROM orders WHERE productID IN (SELECT id FROM products WHERE productType = :productType) AND status = :status AND id = :id AND Active = true");
+            $request->bindValue(':id', $id, PDO::PARAM_INT);
+            $request->bindValue(':productType', $productType, PDO::PARAM_STR);
+            $request->bindValue(':status', $status, PDO::PARAM_STR);
+        }
+        $request->execute();
+        return $request->fetchObject('OrderDTO');
     }
 }

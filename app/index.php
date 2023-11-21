@@ -22,6 +22,8 @@ require_once './controllers/ProductController.php';
 require_once './controllers/TableController.php';
 require_once './controllers/OrderController.php';
 
+// Set Timezone
+date_default_timezone_set('America/Argentina/Buenos_Aires');
 
 // Load ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -31,7 +33,7 @@ $dotenv->safeLoad();
 $app = AppFactory::create();
 $app->setBasePath('/app');
 
-// Add error middleware
+// Add error handler middleware
 $errorMiddleware = function ($request, $exception, $displayErrorDetails) use ($app) {
     $statusCode = 500;
     $errorMessage = $exception->getMessage();
@@ -76,9 +78,12 @@ $app->group('/tables', function (RouteCollectorProxy $group) {
 $app->group('/orders', function (RouteCollectorProxy $group) {
     $group->get('[/]', OrderController::class . '::GetAll')->add(new AuthMiddleware());
     $group->get('/{id}', OrderController::class . '::Get')->add(new AuthMiddleware());
+    $group->get('/{mesaId}/{orderId}', OrderController::class . '::GetTableOrders');
     $group->post('[/]', OrderController::class . '::Add')->add(new AuthMiddleware());
-    $group->put('[/{id}]', OrderController::class . '::Update')->add(new AuthMiddleware());
-    $group->delete('[/{id}]', OrderController::class . '::Delete')->add(new AuthMiddleware());
+    $group->put('/{id}', OrderController::class . '::Update')->add(new AuthMiddleware());
+    $group->put('/prepare/{id}', OrderController::class . '::PrepareOrder')->add(new AuthMiddleware());
+    $group->put('/completed/{id}', OrderController::class . '::CompletedOrder')->add(new AuthMiddleware());
+    $group->delete('/{id}', OrderController::class . '::Delete')->add(new AuthMiddleware());
 });
 
 // LOG IN
