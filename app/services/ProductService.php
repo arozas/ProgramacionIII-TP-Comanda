@@ -22,7 +22,7 @@ class ProductService implements IPersistance
     public static function createList($list)
     {
         foreach ($list as $u) {
-            Product::create($u);
+            ProductService::create($u);
         }
     }
 
@@ -72,7 +72,7 @@ class ProductService implements IPersistance
 
     public static function NameValidation($name)
     {
-        $productList = Product::getAll();
+        $productList = ProductService::getAll();
         foreach ($productList as $p) {
             if ($p->name == $name) {
                 return $p;

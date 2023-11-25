@@ -100,7 +100,7 @@ $app->group('/login', function (RouteCollectorProxy $group) {
     $group->post('[/]', UserController::class . '::LogIn')->add(Logger::class . '::LoginValidation');
 });
 
-$app->add(Logger::class . '::UserLogger');
+//$app->add(Logger::class . '::UserLogger');
 
 // API RUN CONFIRMATION
 $app->get('[/]', function (Request $request, Response $response) {    

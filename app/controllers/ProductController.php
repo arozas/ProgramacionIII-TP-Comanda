@@ -125,7 +125,8 @@ class ProductController implements IApiUse
             fputcsv($stream, get_object_vars($p));
         }
 
-        $response = $response->withHeader('Content-Type', 'application/csv');
+        $response = $response->withHeader('Content-Type', 'text/csv');
+        $response = $response->withHeader('Content-Disposition', 'attachment; filename="product_list.csv"');
         $response = $response->withHeader('Pragma', 'no-cache');
         $response = $response->withHeader('Expires', '0');
         $response = $response->withBody(new \Slim\Psr7\Stream($stream));
@@ -145,13 +146,17 @@ class ProductController implements IApiUse
             if (empty(trim($l))) {
                 break;
             }
-            if (ProductService::NameValidation($data[0]) != null || !ProductService::ProductTypeValidation($data[1])) {
+            echo($data[0]);
+            echo($data[0]);
+            if (ProductService::NameValidation($data[0]) != null || !ProductService::ProductTypeValidation($data[2])) {
                 throw new Exception("Fallo en la carga por validacion de datos");
             }
             $product = new Product();
-            $product->descripcion = $data[0];
-            $product->tipo = $data[1];
-            $product->precio = $data[2];
+            $product->name = $data[0];
+            $product->description = $data[1];
+            $product->productType = $data[2];
+            $product->price = $data[3];
+            $product->stock = $data[4];
             $productoList[] = $product;
         }
 
