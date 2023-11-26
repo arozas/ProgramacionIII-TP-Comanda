@@ -34,6 +34,8 @@ return [
 
                 'GET:/app/surveys/',
                 'GET:/app/surveys/{id}',
+
+                'GET:/app/reports/{id}',
             ],
         ],
         'mozo' => [

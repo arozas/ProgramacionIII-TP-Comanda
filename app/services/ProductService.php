@@ -32,7 +32,8 @@ class ProductService implements IPersistance
         $request = $DAO->prepareRequest("SELECT id, name, description, productType, price, stock FROM products WHERE active = true ");
         $request->execute();
 
-        return $request->fetchAll(PDO::FETCH_CLASS, 'ProductDTO');    }
+        return $request->fetchAll(PDO::FETCH_CLASS, 'ProductDTO');
+    }
 
     public static function getOne($id)
     {

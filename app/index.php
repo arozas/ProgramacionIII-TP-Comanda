@@ -22,6 +22,8 @@ require_once './controllers/ProductController.php';
 require_once './controllers/TableController.php';
 require_once './controllers/OrderController.php';
 require_once './controllers/SurveyController.php';
+require_once './controllers/ReportsControllers.php';
+
 
 
 // Set Timezone
@@ -97,12 +99,18 @@ $app->group('/surveys', function (RouteCollectorProxy $group) {
     $group->post('[/]', SurveyController::class . '::Add');
 });
 
+$app->group('/reports', function (RouteCollectorProxy $group) {
+    $group->get('/{id}', ReportsControllers::class . '::GetLoginByEmployee')->add(new AuthMiddleware());
+    $group->get('[/]', ReportsControllers::class . '::Get')->add(new AuthMiddleware());
+    $group->post('[/]', ReportsControllers::class . '::Add');
+});
+
 // LOG IN
 $app->group('/login', function (RouteCollectorProxy $group) {
     $group->post('[/]', UserController::class . '::LogIn')->add(Logger::class . '::LoginValidation');
 });
 
-//$app->add(Logger::class . '::UserLogger');
+$app->add(Logger::class . '::UserLogger');
 
 // API RUN CONFIRMATION
 $app->get('[/]', function (Request $request, Response $response) {    
