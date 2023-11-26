@@ -21,6 +21,8 @@ require_once './controllers/UserController.php';
 require_once './controllers/ProductController.php';
 require_once './controllers/TableController.php';
 require_once './controllers/OrderController.php';
+require_once './controllers/SurveyController.php';
+
 
 // Set Timezone
 date_default_timezone_set('America/Argentina/Buenos_Aires');

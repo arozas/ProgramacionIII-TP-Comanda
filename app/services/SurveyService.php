@@ -43,7 +43,7 @@ class SurveyService implements IPersistance
         $request = $DAO->prepareRequest("SELECT * FROM surveys");
         $request->execute();
 
-        return $request->fetchAll(PDO::FETCH_CLASS, 'Encuesta');
+        return $request->fetchAll(PDO::FETCH_CLASS, 'Survey');
     }
 
     public static function getOne($value)
@@ -53,7 +53,7 @@ class SurveyService implements IPersistance
         $request->bindValue(':id', $value, PDO::PARAM_STR);
         $request->execute();
 
-        return $request->fetchAll(PDO::FETCH_CLASS, 'Encuesta');
+        return $request->fetchAll(PDO::FETCH_CLASS, 'Survey');
     }
 
     public static function update($object)

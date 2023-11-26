@@ -13,13 +13,10 @@ class AuthMiddleware
             $userType = AuthMiddleware::getUserType();
             $this->allowedRoutes = $config['user_types'][$userType]['allowed_routes'];
         }
-        catch(ExpiredException $expiredException)
+        catch(Exception $expiredException)
         {
-            echo('$expiredException');
-            echo('Para operar debe loguerase de nuevo.');
+            //TO DO
         }
-        $loginRoute = 'POST:/app/login/';
-        $this->allowedRoutes[] = $loginRoute;
     }
 
     public function __invoke($request, $handler)
@@ -50,46 +47,6 @@ class AuthMiddleware
 
         throw new Exception("Ruta no permitida para el tipo de usuario especificado");
     }
-
-    /*
-    public function __construct()
-    {
-        $config = require(__DIR__ . '/../config.php');
-        $userType = AuthMiddleware::getUserType();
-        $this->allowedRoutes = $config['user_types'][$userType]['allowed_routes'];
-    }
-
-    public function __invoke($request, $handler)
-    {
-        $requestedPath = $request->getUri()->getPath();
-        $requestedMethod = $request->getMethod();
-
-        echo($requestedMethod);
-        echo($requestedPath);
-        // Verifica si la ruta es el inicio de sesión y permite el acceso sin token
-        if ($requestedMethod === 'POST' && $requestedPath === '/app/login/') {
-            return $handler->handle($request);
-        }
-
-        $routeWithMethod = $requestedMethod . ':' . $requestedPath;
-
-        if ($this->isRouteAllowed($routeWithMethod)) {
-            $cookies = $request->getCookieParams();
-            $token = $cookies['token'];
-
-            AuthJWT::TokenVerifcation($token);
-            $payload = AuthJWT::GetData($token);
-
-            if ($payload->rol == AuthMiddleware::getUserType()) {
-                echo(ucfirst(AuthMiddleware::getUserType()) . " logueado:");
-                return $handler->handle($request);
-            }
-
-            throw new Exception("Token no válido para el tipo de usuario especificado");
-        }
-
-        throw new Exception("Ruta no permitida para el tipo de usuario especificado");
-    }*/
 
     private function isRouteAllowed($routeWithMethod)
     {
@@ -179,23 +136,4 @@ class AuthMiddleware
             throw new Exception("No se pudo obtener el tipo de usuario. " . $e->getMessage());
         }
     }
-
-
-    /*
-    public static function getUserType()
-    {
-        try {
-            $cookies = $_COOKIE;
-            $token = $cookies['token'];
-
-            $payload = AuthJWT::GetData($token);
-
-            return $payload->rol;
-        } catch (Exception $e) {
-            throw new Exception("No se pudo obtener el tipo de usuario.");
-        }
-    }
-    */
-
-
 }

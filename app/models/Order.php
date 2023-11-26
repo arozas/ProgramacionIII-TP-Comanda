@@ -24,6 +24,7 @@ class Order
         } else {
             return null;
         }
+
     }
 
     public function __set($property, $value)

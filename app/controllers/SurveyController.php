@@ -1,4 +1,6 @@
 <?php
+require_once './models/Survey.php';
+require_once './services/SurveyService.php';
 
 class SurveyController implements IApiUse
 {
@@ -26,13 +28,13 @@ class SurveyController implements IApiUse
 
         $orderTableVerified = OrderService::verifiedOrderByTable($codigoMesa, $codigoPedido, OrderStatus::PAYED->getStringValue());
 
-        if ($orderTableVerified) {
+        if ($orderTableVerified == true) {
 
             SurveyService::create($survey);
 
             $payload = json_encode(array("mensaje" => "Encuesta registrada con exito"));
         } else {
-            $payload = json_encode(array("mensaje" => "Para registrar la encuesta el cliente tiene que terminar y pagar el pedido."));
+            $payload = json_encode(array("mensaje" => "No existe pedido, no está pago o ya se cargó una encuesta para este pedido."));
 
         }
 

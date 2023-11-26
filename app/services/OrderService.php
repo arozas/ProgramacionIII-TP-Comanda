@@ -105,8 +105,6 @@ class OrderService implements IPersistance
         return $request->fetchColumn();
     }
 
-
-
     public static function getOrdersByStatus($productType, $status)
     {
         $DAO = DataAccessObject::getInstance();
@@ -127,6 +125,10 @@ class OrderService implements IPersistance
     public static function verifiedOrderByTable($tableId, $orderId, $status)
     {
         $orders = self::getOrdersByTable($tableId, $orderId);
+
+        if (empty($orders)) {
+            return false;
+        }
 
         foreach ($orders as $order) {
             if ($order->status != $status) {
